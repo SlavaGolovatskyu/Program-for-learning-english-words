@@ -1,4 +1,3 @@
-import asyncio
 from tkinter import *
 from tkinter import messagebox
 from database.connect import ManageDataBase
