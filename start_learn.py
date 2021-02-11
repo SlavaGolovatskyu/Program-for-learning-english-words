@@ -19,7 +19,7 @@ class Validation(object):
 	# Stopped program if she working
 	# else send error.
 	def stop(self):
-		data = json.load(open('./options/options.json'))
+		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
 			data['Work'] = 0
 			with open('./options/options.json', 'w') as f:
