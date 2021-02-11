@@ -56,28 +56,29 @@ class Validation(object):
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
 
 class StartMode(Validation):
+	def init(self):
+		self.AsyncStart = ControllerThreads(target = lambda: self.CentrallMode())
+		self.AsyncStart.start()
+
+	def CentrallMode(self):
+		while True:
+			data = json.load(open('./options/options.json', 'r'))
+			messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
+			time.sleep(data['Timer'])
+			data = json.load(open('./options/options.json', 'r'))
+			if data['Work'] == 0:
+				self.AsyncStart.kill()
+				self.AsyncStart.join()
+				break
+
 	def startMode(self, time):
 		if super(StartMode, self).checkToStart(time):
-			def CentrallMode(self):
-				data = json.load(open('./options/options.json', 'r'))
-				if data['Work'] == 0:
-					self.AsyncStart.kill()
-					self.AsyncStart.join()
-					return
-				data['Work'] = 1
-				data['Timer'] = time
-				with open('./options/options.json', 'w') as f:
-					json.dump(data, f)
-
-				while True:
-					data = json.load(open('./options/options.json', 'r'))
-					messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
-					time.sleep(data['Timer'])
-					if data['Work'] == 0:
-						self.AsyncStart.kill()
-						self.AsyncStart.join()
-						break
-			self.AsyncStart = ControllerThreads(target = lambda: self.CentrallMode()).start()
+			data = json.load(open('./options/options.json', 'r'))
+			data['Work'] = 1
+			data['Timer'] = int(time)
+			with open('./options/options.json', 'w') as f:
+				json.dump(data, f)
+			self.init()
 
 class WindowForStartLearn(StartMode):
 	def __init__(self, parent):
