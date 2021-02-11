@@ -10,7 +10,7 @@ from database.connect import ManageDataBase
 
 class Validation(object):
 	def back_return_bool(self) -> bool:
-		data = json.load(open('./options/options.json'))
+		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
 			messagebox.showerror('Ошибка', 'Остановите сначала програму. Затем вы сможете выйти.')
 			return False
