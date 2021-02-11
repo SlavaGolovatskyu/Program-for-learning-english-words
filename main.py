@@ -3,6 +3,8 @@ from tkinter import *
 from tkinter import messagebox
 from database.connect import ManageDataBase
 from add_words import WindowForAddWords
+from start_learn import WindowForStartLearn
+
 
 __author__ = 'Slava Golovatskyu'
 __version__ = 'V-0.1'
@@ -30,13 +32,17 @@ class Program:
 							      fg = fg_for_buttons, bg = bg_for_buttons,
 								  relief = 'solid', activebackground = '#6e6f73',
 								  activeforeground = '#eff5c9', width = '25',
-								  height = '2')
+								  height = '2', command = self.start_learn)
 
 		self.button_all_words = Button(text = 'Список всех слов', font = 'Consolas 13',
 							      	  fg = fg_for_buttons, bg = bg_for_buttons,
 								      relief = 'solid', activebackground = '#6e6f73',
 								      activeforeground = '#eff5c9', width = '25',
 								      height = '2')
+
+	def start_learn(self):
+		self.root.withdraw()
+		WindowForStartLearn(self.root).run()
 
 	def add_words(self):
 		self.root.withdraw()

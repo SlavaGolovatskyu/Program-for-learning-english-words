@@ -6,12 +6,17 @@ from database.connect import ManageDataBase
 class WindowForStartLearn:
 	def __init__(self, parent):
 		self.config = configparser.ConfigParser()  # создаём объекта парсера
-		self.config.read("./src/options.ini")
+		self.config.read("./options/options.ini") # Считываем данные с src/options.ini
+
+		self.ManageDB = ManageDataBase()
+
 		self.width = 400
 		self.height = 300
+
 		self.main = parent
 		self.root = Toplevel(parent)
-		self.ManageDB = ManageDataBase()
+
+
 		self.root.geometry(f'{self.width}x{self.height}+300+300')
 		self.root.title('Learn English')
 		self.root['bg'] = '#56ADE7'
@@ -27,11 +32,19 @@ class WindowForStartLearn:
 							font = 'Consolas 12', justify = 'center')
 		self.button_back = Button(self.root, text = 'Назад', width = '25', height = '2',
 							     bg = bg_for_buttons, fg = fg_for_buttons, command = self.back)
+		self.button_stop = Button(self.root, text = 'Остановить', width = '25', height = '2',
+							     bg = bg_for_buttons, fg = fg_for_buttons, command = self.stop)
 
 		self.enter_3.bind('<Button-1>', self.delete_text)
 
+	def stop(self):
+		if self.config['Work']['work'] == 'True':
+			self.config['Work']['work'] = 'False'
+		else:
+			messagebox.showerror('Error', 'Режим изучения слов не включен.')
+
 	def back(self):
-		if self.config['Work']['work']:
+		if self.config['Work']['work'] == 'True':
 			messagebox.showerror('Ошибка', 'Остановите сначала програму. Затем вы сможете выйти.')
 		else:
 			self.root.destroy()
@@ -42,12 +55,11 @@ class WindowForStartLearn:
 
 	def run(self):
 		self.draw_window()
-		self.enter_3.insert(0, 'Введите слово с переводом')
+		self.enter_3.insert(0, 'Установите таймер в секундах.')
 		self.root.mainloop()
 
 	def draw_window(self):
 		self.enter_3.place(x = self.width/7.7, y = 80)
-		self.button_back.place(x = self.width/4, y = 160)
-		self.button_note_word.place(x = self.width/4, y = 240)		
+		self.button_back.place(x = self.width/4, y = 160)	
 
 
