@@ -1,31 +1,29 @@
 """
-	* imported library configparser for the working with.ini files
+	* imported library json for the working with.json files
 	* Tkinter for the create App
 	* database/connect.py imported for the working with DB
 """ 
-import configparser
+import json
 from tkinter import *
 from tkinter import messagebox
 from database.connect import ManageDataBase
 
 class Validation(object):
-	def __init__(self):
-		self.config = configparser.ConfigParser()  # create object parser's
-		self.config.read("./options/options.ini") # read data from ./options/options.ini
-
-	# 
 	def back_return_bool(self) -> bool:
-		if self.config['Work']['work'] == 'True':
+		data = json.load(open('./options/options.json'))
+		if data['Work'] == 1:
 			messagebox.showerror('Ошибка', 'Остановите сначала програму. Затем вы сможете выйти.')
 			return False
-		else:
-			return True
+		return True
 
 	# Stopped program if she working
 	# else send error.
 	def stop(self):
-		if self.config['Work']['work'] == 'True':
-			self.config['Work']['work'] = 'False'
+		data = json.load(open('./options/options.json'))
+		if data['Work'] == 1:
+			data['Work'] = 0
+			with open('./options/options.json', 'w') as f:
+				json.dump(data, f)
 			messagebox.showinfo('Success', 'Програма успешно остановленна.')
 		else:
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
@@ -66,6 +64,7 @@ class WindowForStartLearn(Validation):
 		self.enter_3.bind('<Button-1>', self.delete_text)
 
 	def start_regime(self):
+		pass
 
 	def stop(self):
 		super(WindowForStartLearn, self).stop()
@@ -84,7 +83,9 @@ class WindowForStartLearn(Validation):
 		self.root.mainloop()
 
 	def draw_window(self):
-		self.enter_3.place(x = self.width/7.7, y = 80)
-		self.button_back.place(x = self.width/4, y = 160)	
+		self.enter_3.place(x = self.width/7.7, y = 40)
+		self.button_back.place(x = self.width/4, y = 100)	
+		self.button_stop.place(x = self.width/4, y = 160)
+		self.button_start.place(x = self.width/4, y = 220)
 
 
