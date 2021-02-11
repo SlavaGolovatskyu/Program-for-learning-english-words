@@ -2,7 +2,7 @@
 	* imported library json for the working with.json files
 	* Tkinter for the create App
 	* database/connect.py imported for the working with DB
-	* asyncio need for asynchronous timer.
+	* "time" library need required for timer.
 """ 
 
 import json
