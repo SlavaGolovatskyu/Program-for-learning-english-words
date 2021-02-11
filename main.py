@@ -38,7 +38,6 @@ class Program:
 								      relief = 'solid', activebackground = '#6e6f73',
 								      activeforeground = '#eff5c9', width = '25',
 								      height = '2')
-
 	def start_learn(self):
 		self.root.withdraw()
 		WindowForStartLearn(self.root).run()

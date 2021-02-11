@@ -2,33 +2,98 @@
 	* imported library json for the working with.json files
 	* Tkinter for the create App
 	* database/connect.py imported for the working with DB
+	* "time" library need required for timer.
+	* imported ControllThread from src for asynchronous programming
 """ 
+
 import json
+import time
 from tkinter import *
 from tkinter import messagebox
+from src.ControllThread import ControllerThreads
 from database.connect import ManageDataBase
 
 class Validation(object):
-	def back_return_bool(self) -> bool:
+	"""
+		* in advance. if Work == 0 mode don't work
+		* else working
+		* True and False replaced 1 and 0
+	"""
+	def checkToStart(self, time) -> bool:
+		# upload data
+		data = json.load(open('./options/options.json', 'r'))  
+		# Learn the number of elements in DataBase
+		DBlength = ManageDataBase().check_length_db()
+		# number check
+		isdigitTime = time.isdigit()
+		if isdigitTime:
+			if int(time) > 0:
+				if data['Work'] == 0:
+					if DBlength:
+						return True
+					else:
+						messagebox.showerror('Error', 'В базе данных нет ни единого слова.')
+						return False
+				else:
+					messagebox.showerror('Error', 'Режим уже был запущен.')
+					return False
+			else:
+				messagebox.showerror('Error', 'Некоректное количество секунд.')
+				return False
+		else:
+			messagebox.showerror('Error', 'Вы указали вместо секунд буквы.')
+			return False
+
+	# This feature is designed to check if the mode works or not.
+	def checkButtonToReturn(self) -> bool:
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
 			messagebox.showerror('Ошибка', 'Остановите сначала програму. Затем вы сможете выйти.')
 			return False
 		return True
 
-	# Stopped program if she working
-	# else send error.
+	"""
+	   * Stopped mode if he is working
+	   * else send error.
+	"""
 	def stop(self):
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
 			data['Work'] = 0
+			data['Timer'] = 0
 			with open('./options/options.json', 'w') as f:
 				json.dump(data, f)
 			messagebox.showinfo('Success', 'Програма успешно остановленна.')
 		else:
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
 
-class WindowForStartLearn(Validation):
+class StartMode(Validation):
+	def init(self):
+		# run the function in a separate thread
+		self.AsyncStart = ControllerThreads(target = lambda: self.CentrallMode())
+		self.AsyncStart.start()
+
+	def CentrallMode(self):
+		while True:
+			data = json.load(open('./options/options.json', 'r'))
+			messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
+			time.sleep(data['Timer'])
+			data = json.load(open('./options/options.json', 'r'))
+			if data['Work'] == 0:
+				self.AsyncStart.kill()
+				self.AsyncStart.join()
+				break
+
+	def startMode(self, time):
+		if super(StartMode, self).checkToStart(time):
+			data = json.load(open('./options/options.json', 'r'))
+			data['Work'] = 1
+			data['Timer'] = int(time)
+			with open('./options/options.json', 'w') as f:
+				json.dump(data, f)
+			self.init()
+
+class WindowForStartLearn(StartMode):
 	def __init__(self, parent):
 		self.ManageDB = ManageDataBase()
 
@@ -64,13 +129,16 @@ class WindowForStartLearn(Validation):
 		self.enter_3.bind('<Button-1>', self.delete_text)
 
 	def start_regime(self):
-		pass
+		if self.enter_3.get():
+			super(WindowForStartLearn, self).startMode(self.enter_3.get())
+		else:
+			messagebox.showerror('Error', 'Введите данные!')
 
 	def stop(self):
 		super(WindowForStartLearn, self).stop()
 
 	def back(self):
-		if super(WindowForStartLearn, self).back_return_bool():
+		if super(WindowForStartLearn, self).checkButtonToReturn():
 			self.root.destroy()
 			self.main.deiconify()
 

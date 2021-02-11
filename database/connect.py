@@ -26,7 +26,7 @@ class ManageDataBase:
 		if count == 1:
 			return self.s.execute('SELECT word FROM Words WHERE _id = (?)', (1,)).fetchone()[0]
 		return self.s.execute("""SELECT word FROM Words WHERE _id = (?)""",
-							 (random.randint(1, count + 1),)).fetchone()[0]
+							 (random.randint(1, count),)).fetchone()[0]
 
 	# Validation
 	def check_length_db(self) -> bool:
