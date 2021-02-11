@@ -9,7 +9,29 @@ from tkinter import messagebox
 from database.connect import ManageDataBase
 
 class Validation(object):
-	def back_return_bool(self) -> bool:
+	def checkToStart(self, time):
+		data = json.load(open('./options/options.json', 'r'))
+		DBlength = ManageDataBase().check_length_db()
+		isdigitTime = time.isdigit()
+		if isdigitTime:
+			if time > 0:
+				if data['Work'] == 0:
+					if DBlength:
+						return True
+					else:
+						messagebox.showerror('Error', 'В базе данных нет ни единого слова.')
+						return False
+				else:
+					messagebox.showerror('Error', 'Режим уже был запущен.')
+					return False
+			else:
+				messagebox.showerror('Error', 'Некоректное количество секунд.')
+				return False
+		else:
+			messagebox.showerror('Error', 'Вы указали вместо секунд буквы.')
+			return False
+
+	def checkButtonToReturn(self) -> bool:
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
 			messagebox.showerror('Ошибка', 'Остановите сначала програму. Затем вы сможете выйти.')
@@ -28,7 +50,11 @@ class Validation(object):
 		else:
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
 
-class WindowForStartLearn(Validation):
+class StartMode(Validation):
+	def startMode(self, time):
+		if super(StartMode, self).checkToStart(time):
+
+class WindowForStartLearn(StartMode):
 	def __init__(self, parent):
 		self.ManageDB = ManageDataBase()
 
@@ -64,13 +90,13 @@ class WindowForStartLearn(Validation):
 		self.enter_3.bind('<Button-1>', self.delete_text)
 
 	def start_regime(self):
-		pass
+		super(WindowForStartLearn, self).startMode(self.enter_3.get())
 
 	def stop(self):
 		super(WindowForStartLearn, self).stop()
 
 	def back(self):
-		if super(WindowForStartLearn, self).back_return_bool():
+		if super(WindowForStartLearn, self).checkButtonToReturn():
 			self.root.destroy()
 			self.main.deiconify()
 
