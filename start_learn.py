@@ -3,6 +3,7 @@
 	* Tkinter for the create App
 	* database/connect.py imported for the working with DB
 	* "time" library need required for timer.
+	* imported ControllThread from src for asynchronous programming
 """ 
 
 import json
@@ -13,9 +14,17 @@ from src.ControllThread import ControllerThreads
 from database.connect import ManageDataBase
 
 class Validation(object):
-	def checkToStart(self, time):
-		data = json.load(open('./options/options.json', 'r'))
+	"""
+		* in advance. if Work == 0 mode don't work
+		* else working
+		* True and False replaced 1 and 0
+	"""
+	def checkToStart(self, time) -> bool:
+		# upload data
+		data = json.load(open('./options/options.json', 'r'))  
+		# Learn the number of elements in DataBase
 		DBlength = ManageDataBase().check_length_db()
+		# number check
 		isdigitTime = time.isdigit()
 		if isdigitTime:
 			if int(time) > 0:
@@ -35,6 +44,7 @@ class Validation(object):
 			messagebox.showerror('Error', 'Вы указали вместо секунд буквы.')
 			return False
 
+	# This feature is designed to check if the mode works or not.
 	def checkButtonToReturn(self) -> bool:
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
@@ -42,8 +52,10 @@ class Validation(object):
 			return False
 		return True
 
-	# Stopped program if she working
-	# else send error.
+	"""
+	   * Stopped mode if he is working
+	   * else send error.
+	"""
 	def stop(self):
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
@@ -57,6 +69,7 @@ class Validation(object):
 
 class StartMode(Validation):
 	def init(self):
+		# run the function in a separate thread
 		self.AsyncStart = ControllerThreads(target = lambda: self.CentrallMode())
 		self.AsyncStart.start()
 
