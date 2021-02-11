@@ -2,7 +2,7 @@
 	* imported library json for the working with.json files
 	* Tkinter for the create App
 	* database/connect.py imported for the working with DB
-	* "time" library need required for timer.5teyfyghhjfgh
+	* "time" library need required for timer.
 """ 
 
 import json
@@ -54,8 +54,7 @@ class Validation(object):
 			messagebox.showinfo('Success', 'Програма успешно остановленна.')
 		else:
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
-kjhljlkljklknj
-kuhjjkhhjk
+
 class StartMode(Validation):
 	def startMode(self, time):
 		if super(StartMode, self).checkToStart(time):
