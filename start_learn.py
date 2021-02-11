@@ -2,10 +2,14 @@
 	* imported library json for the working with.json files
 	* Tkinter for the create App
 	* database/connect.py imported for the working with DB
+	* asyncio need for asynchronous timer.
 """ 
+
 import json
+import time
 from tkinter import *
 from tkinter import messagebox
+from src.ControllThread import ControllerThreads
 from database.connect import ManageDataBase
 
 class Validation(object):
@@ -14,7 +18,7 @@ class Validation(object):
 		DBlength = ManageDataBase().check_length_db()
 		isdigitTime = time.isdigit()
 		if isdigitTime:
-			if time > 0:
+			if int(time) > 0:
 				if data['Work'] == 0:
 					if DBlength:
 						return True
@@ -44,6 +48,7 @@ class Validation(object):
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
 			data['Work'] = 0
+			data['Timer'] = 0
 			with open('./options/options.json', 'w') as f:
 				json.dump(data, f)
 			messagebox.showinfo('Success', 'Програма успешно остановленна.')
@@ -53,6 +58,26 @@ class Validation(object):
 class StartMode(Validation):
 	def startMode(self, time):
 		if super(StartMode, self).checkToStart(time):
+			def CentrallMode(self):
+				data = json.load(open('./options/options.json', 'r'))
+				if data['Work'] == 0:
+					self.AsyncStart.kill()
+					self.AsyncStart.join()
+					return
+				data['Work'] = 1
+				data['Timer'] = time
+				with open('./options/options.json', 'w') as f:
+					json.dump(data, f)
+
+				while True:
+					data = json.load(open('./options/options.json', 'r'))
+					messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
+					time.sleep(data['Timer'])
+					if data['Work'] == 0:
+						self.AsyncStart.kill()
+						self.AsyncStart.join()
+						break
+			self.AsyncStart = ControllerThreads(target = lambda: self.CentrallMode()).start()
 
 class WindowForStartLearn(StartMode):
 	def __init__(self, parent):
@@ -90,7 +115,10 @@ class WindowForStartLearn(StartMode):
 		self.enter_3.bind('<Button-1>', self.delete_text)
 
 	def start_regime(self):
-		super(WindowForStartLearn, self).startMode(self.enter_3.get())
+		if self.enter_3.get():
+			super(WindowForStartLearn, self).startMode(self.enter_3.get())
+		else:
+			messagebox.showerror('Error', 'Введите данные!')
 
 	def stop(self):
 		super(WindowForStartLearn, self).stop()
