@@ -8,6 +8,7 @@
 
 import json
 import time
+import traceback
 from tkinter import *
 from tkinter import messagebox
 from src.ControllThread import ControllerThreads
@@ -68,21 +69,31 @@ class Validation(object):
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
 
 class StartMode(Validation):
+	def every(self, delay, task):
+		next_time = time.time() + delay
+		while True:
+			time.sleep(max(0.5, next_time - time.time()))
+			try:
+				task()
+			except Exception:
+				traceback.print_exc()
+				# in production code you might want to have this instead of course:
+				# logger.exception("Problem while executing repetitive task.")
+				# skip tasks if we are behind schedule:
+				next_time += (time.time() - next_time) // delay * delay + delay
+
 	def init(self):
 		# run the function in a separate thread
-		self.AsyncStart = ControllerThreads(target = lambda: self.CentrallMode())
+		data = json.load(open('./options/options.json', 'r'))
+		self.AsyncStart = ControllerThreads(target = lambda: self.every(data['Timer'], self.ModeON))
 		self.AsyncStart.start()
 
-	def CentrallMode(self):
-		while True:
-			data = json.load(open('./options/options.json', 'r'))
+	def ModeON(self):
+		if json.load(open('./options/options.json', 'r'))['Work'] == 1:
 			messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
-			time.sleep(data['Timer'])
-			data = json.load(open('./options/options.json', 'r'))
-			if data['Work'] == 0:
-				self.AsyncStart.kill()
-				self.AsyncStart.join()
-				break
+		else:
+			self.AsyncStart.kill()
+			self.AsyncStart.join()
 
 	def startMode(self, time):
 		if super(StartMode, self).checkToStart(time):
