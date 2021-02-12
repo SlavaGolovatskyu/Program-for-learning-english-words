@@ -1,7 +1,6 @@
 import threading
 import sys
 
-
 class ControllerThreads(threading.Thread):
 	def __init__(self, *args, **keywords):
 		threading.Thread.__init__(self, *args, **keywords)

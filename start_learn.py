@@ -31,7 +31,11 @@ class Validation(object):
 			if int(time) > 0:
 				if data['Work'] == 0:
 					if DBlength:
-						return True
+						if data['Mode'] == 0:
+							return True
+						else:
+							messagebox.showerror('Error', f'Чтоб снова запустить режим подождите {time} секунд.')
+							return False
 					else:
 						messagebox.showerror('Error', 'В базе данных нет ни единого слова.')
 						return False
@@ -57,52 +61,56 @@ class Validation(object):
 	   * Stopped mode if he is working
 	   * else send error.
 	"""
+	def function_for_sleep(self):
+		data = json.load(open('./options/options.json', 'r'))
+		time.sleep(data['Timer'])
+		data['Mode'] = 0
+		with open('./options/options.json', 'w') as f:
+			json.dump(data, f)
+		self.sleepFunc.kill()
+		self.sleepFunc.join()
+
 	def stop(self):
 		data = json.load(open('./options/options.json', 'r'))
 		if data['Work'] == 1:
-			data['Work'] = 0
-			data['Timer'] = 0
-			with open('./options/options.json', 'w') as f:
-				json.dump(data, f)
-			messagebox.showinfo('Success', 'Програма успешно остановленна.')
+			if data['Mode'] == 1:
+				data['Work'] = 0
+				with open('./options/options.json', 'w') as f:
+					json.dump(data, f)
+				messagebox.showinfo('Success', 'Програма успешно остановленна.')
+				self.sleepFunc = ControllerThreads(target = lambda: self.function_for_sleep())
+				self.sleepFunc.start()
 		else:
 			messagebox.showerror('Error', 'Режим изучения слов не включен.')
 
 class StartMode(Validation):
-	def every(self, delay, task):
-		next_time = time.time() + delay
-		while True:
-			time.sleep(max(0.5, next_time - time.time()))
-			try:
-				task()
-			except Exception:
-				traceback.print_exc()
-				# in production code you might want to have this instead of course:
-				# logger.exception("Problem while executing repetitive task.")
-				# skip tasks if we are behind schedule:
-				next_time += (time.time() - next_time) // delay * delay + delay
-
 	def init(self):
 		# run the function in a separate thread
 		data = json.load(open('./options/options.json', 'r'))
-		self.AsyncStart = ControllerThreads(target = lambda: self.every(data['Timer'], self.ModeON))
+		self.AsyncStart = ControllerThreads(target = lambda: self.ModeON())
 		self.AsyncStart.start()
 
 	def ModeON(self):
-		if json.load(open('./options/options.json', 'r'))['Work'] == 1:
-			messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
-		else:
-			self.AsyncStart.kill()
-			self.AsyncStart.join()
+		time.sleep(json.load(open('./options/options.json', 'r'))['Timer'])
+		while True:
+			if json.load(open('./options/options.json', 'r'))['Work'] == 1:
+				messagebox.showinfo('Word', f'{ManageDataBase().get_random_word()}')
+				time.sleep(json.load(open('./options/options.json', 'r'))['Timer'])
+			else:
+				self.AsyncStart.kill()
+				self.AsyncStart.join()
+				break
 
 	def startMode(self, time):
 		if super(StartMode, self).checkToStart(time):
 			data = json.load(open('./options/options.json', 'r'))
 			data['Work'] = 1
 			data['Timer'] = int(time)
+			data['Mode'] = 1
 			with open('./options/options.json', 'w') as f:
 				json.dump(data, f)
 			self.init()
+			messagebox.showinfo('Success', 'Режим включен!')
 
 class WindowForStartLearn(StartMode):
 	def __init__(self, parent):
