@@ -15,8 +15,8 @@ class ManageDataBase:
 	def create_table_if_not_exists(self):
 		# Create table if it is not there
 		self.s.execute("""CREATE TABLE IF NOT EXISTS 
-					  Words(_id INTEGER PRIMARY KEY AUTOINCREMENT,
-					  word TEXT)""")
+			       Words(_id INTEGER PRIMARY KEY AUTOINCREMENT,
+			       word TEXT)""")
 		self.db.commit()
 
 	# Get random word from DataBase
@@ -26,7 +26,7 @@ class ManageDataBase:
 		if count == 1:
 			return self.s.execute('SELECT word FROM Words WHERE _id = (?)', (1,)).fetchone()[0]
 		return self.s.execute("""SELECT word FROM Words WHERE _id = (?)""",
-							 (random.randint(1, count),)).fetchone()[0]
+				      (random.randint(1, count),)).fetchone()[0]
 
 	# Validation
 	def check_length_db(self) -> bool:
