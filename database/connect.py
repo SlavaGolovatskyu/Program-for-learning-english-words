@@ -31,9 +31,7 @@ class ManageDataBase:
 	# Validation
 	def check_length_db(self) -> bool:
 		count = self.s.execute('SELECT COUNT(*) FROM Words').fetchone()[0]
-		if count == 0:
-			return False
-		return True
+		return count == 0
 
 	# Note word in DataBase
 	def write_word_in_db(self, word):
